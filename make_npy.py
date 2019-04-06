@@ -26,7 +26,16 @@ def main():
                         'A#:maj', 'A#:min',
                         'B:maj', 'B:min']
 
-    csv_files = glob.glob('dataset/new_train/*.csv')
+    print("1. Train set\n2. Test set")
+    _input = input('Choose dataset to make npy file :')
+    if _input == '1':
+        file_path = 'dataset/new_train/*.csv'
+    elif _input == '2':
+        file_path = 'dataset/new_test/*.csv'
+    else:
+        print("input error")
+        exit()
+    csv_files = glob.glob(file_path)
     note_dict_len = len(note_dictionary)
     chord_dict_len = len(chord_dictionary)
 
@@ -64,8 +73,11 @@ def main():
             pre_measure = measure
         result_input_matrix.append(note_sequence)  # case : last measure note
 
-    np.save('dataset/input_vector.npy', np.array(result_input_matrix))
-    np.save('dataset/target_vector.npy', np.array(result_target_matrix))
+    if _input == '1':
+        np.save('dataset/input_vector.npy', np.array(result_input_matrix))
+        np.save('dataset/target_vector.npy', np.array(result_target_matrix))
+    elif _input == '2':
+        np.save('dataset/test_vector.npy', np.array(result_input_matrix))
 
 
 if __name__ == '__main__':

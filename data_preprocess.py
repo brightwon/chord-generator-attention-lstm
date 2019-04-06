@@ -119,8 +119,19 @@ def main():
 
     root_dictionary = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 
-    csv_files = glob.glob('dataset/csv_train/*.csv')
-    new_csv_path = 'dataset/new_train/'
+    print("1. Train set\n2. Test set")
+    _input = input('Choose dataset to preprocess :')
+    if _input == '1':
+        file_path = 'dataset/new_train/*.csv'
+        new_csv_path = 'dataset/new_train/'
+    elif _input == '2':
+        file_path = 'dataset/new_test/*.csv'
+        new_csv_path = 'dataset/new_test/'
+    else:
+        print("input error")
+        exit()
+
+    csv_files = glob.glob(file_path)
 
     for i, csv_path in enumerate(csv_files):
         file_name = ntpath.basename(csv_path)
