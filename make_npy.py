@@ -1,5 +1,7 @@
 import glob
 import csv
+import os
+import ntpath
 import numpy as np
 
 
@@ -8,6 +10,14 @@ def one_hot_encoding(length, one_index):
     vectors = [0] * length
     vectors[one_index] = 1
     return vectors
+
+
+def make_test_npys(file_name, song_sequence):
+    """Create npy file for each song in the test set."""
+    file_path = "dataset/test_npy"
+    if not os.path.isdir(file_path):
+        os.mkdir(file_path)
+    np.save('%s/%s.npy' % (file_path, file_name.split('.')[0]), np.array(song_sequence))
 
 
 def main():
@@ -34,21 +44,24 @@ def main():
         file_path = 'dataset/new_test/*.csv'
     else:
         print("input error")
-        exit()
+        return None
+
     csv_files = glob.glob(file_path)
     note_dict_len = len(note_dictionary)
     chord_dict_len = len(chord_dictionary)
 
+    # list for final input/target vector
     result_input_matrix = []
     result_target_matrix = []
 
-    # make the matrix from csv data.
+    # make the matrix from csv data
     for csv_path in csv_files:
         csv_ins = open(csv_path, 'r', encoding='utf-8')
         next(csv_ins)  # skip first line
         reader = csv.reader(csv_ins)
 
         note_sequence = []
+        song_sequence = []  # list for each song(each npy file) in the test set
         pre_measure = None
         for line in reader:
             measure = int(line[0])
@@ -59,19 +72,27 @@ def main():
             chord_index = chord_dictionary.index(chord)
             note_index = note_dictionary.index(note)
 
+            one_hot_note_vec = one_hot_encoding(note_dict_len, note_index)
+            one_hot_chord_vec = one_hot_encoding(chord_dict_len, chord_index)
+
             if pre_measure is None:  # case : first line
-                note_sequence.append(one_hot_encoding(note_dict_len, note_index))
-                result_target_matrix.append(one_hot_encoding(chord_dict_len, chord_index))
+                note_sequence.append(one_hot_note_vec)
+                result_target_matrix.append(one_hot_chord_vec)
 
             elif pre_measure == measure:  # case : same measure note
-                note_sequence.append(one_hot_encoding(note_dict_len, note_index))
+                note_sequence.append(one_hot_note_vec)
 
             else:  # case : next measure note
+                song_sequence.append(note_sequence)
                 result_input_matrix.append(note_sequence)
-                note_sequence = [one_hot_encoding(note_dict_len, note_index)]
-                result_target_matrix.append(one_hot_encoding(chord_dict_len, chord_index))
+                note_sequence = [one_hot_note_vec]
+                result_target_matrix.append(one_hot_chord_vec)
             pre_measure = measure
         result_input_matrix.append(note_sequence)  # case : last measure note
+
+        if _input == '2':
+            # make npy file for each song
+            make_test_npys(ntpath.basename(csv_path), song_sequence)
 
     if _input == '1':
         np.save('dataset/input_vector.npy', np.array(result_input_matrix))

@@ -129,7 +129,7 @@ def main():
         new_csv_path = 'dataset/new_test/'
     else:
         print("input error")
-        exit()
+        return None
 
     csv_files = glob.glob(file_path)
 
